@@ -1,4 +1,6 @@
 %% Lab 04
+% Acquiring and Displaying HDR Images
+%% Camera Setup
 
 c = Camera(0);
 c.framerate = 0.5;
@@ -6,7 +8,7 @@ c.exposure = 20;
 c.pixelclock = 7;
 c.aoi = [0, 0, 1280, 1024];
 
-%%
+%% Image Acquisiation
 n = 10:1:100;
 img = zeros(1280, 1024, 5, length(n));
 j = 1;
