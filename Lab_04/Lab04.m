@@ -25,6 +25,43 @@ for i = n
     j = j + 1;
 end
 
+%% Reformat images
+
+for i = 5:25
+    loadFile = sprintf('img%d.mat', i);
+    load(loadFile)
+    imgString = sprintf('img%d', i);
+    Img = eval(imgString);
+    depth = size(Img,4);
+    Img = mean(Img,3);
+    Img = reshape(Img,[1280,1024,depth]);
+    IMG = cat(3,IMG,Img);
+end
+
+load('img26.mat')
+Img = mean(img26,3);
+IMG = cat(3,IMG,Img);
+
+mask = (IMG > 350) .* (IMG < 800);
+maskedIMG = IMG .* mask;
+
+load('img4.mat');
+Img = mean(img4,3);
+Img = Img(:,:,1,1);
+
+mask = (IMG > 350);
+satImg = Img.*mask;
+IMG = cat(3,Img,IMG);
+
+j = 0;
+for i = size(IMG,3):-1:2
+    IMG(:,:,i) = IMG(:,:,i)+(449*j);
+    j = j+1;
+end
+
+IMG(:,:,1) = IMG(:,:,1) + max(IMG(:,:,size(IMG,3)),[],'all');
+
+
 %% Analysis
 % load in image
 img_log = log10(img);
