@@ -39,7 +39,13 @@ for i = 5:25
     IMG = cat(3,IMG,Img);
 end
 
-mask1 = (IMG > 350) .* (IMG <= 800);
+refIMG = IMG;
+%% Masks
+IMG = refIMG;
+lowMask = 200;
+highMask = 600;
+
+mask1 = (IMG > lowMask) .* (IMG <= highMask);
 %maskedIMG = IMG .* mask1;
 
 load('img26.mat') % highest exposure, darkest regions
@@ -51,7 +57,7 @@ load('img4.mat'); % lowest exposure, brightest regions
 Img = mean(img4,3);
 Img = Img(:,:,1,1);
 
-mask2 = (Img > 350);
+mask2 = (Img > 50);
 %satImg = Img.*mask2;
 IMG = cat(3,Img,IMG);
 
@@ -62,13 +68,13 @@ mask = cat(3,mask,mask3);
 
 j = 0;
 for i = size(IMG,3):-1:1
-    IMG(:,:,i) = IMG(:,:,i)+(450*j);
+    IMG(:,:,i) = IMG(:,:,i)+((highMask-lowMask)*j);
     j = j+1;
 end
 
 mask(:,:,1) = ones(1280,1024);
 IMG = IMG .* mask;
-IMG = IMG+1;
+%IMG = IMG+1;
 
 %% More image manipulation
 
@@ -77,13 +83,27 @@ DRmask = sum(mask,3);
 DRimg = DRimg./DRmask;
 
 logImg = log10(DRimg);
-logImg = logImg - mean(logImg,'all'); % attenuate edge edges
+%logImg = logImg - mean(logImg,'all'); % attenuate edge edges
+%logImg = logImg + min(logImg,[],'all');
 
 der = [0 1 0; 1 -4 1; 0 1 0]; % kernel to take the derivative
 derImg = conv2(logImg,der,'same');
+derImg = derImg(3:1270,3:1010);
+% derImg(1,:) = derImg(2,:);
+% derImg(1280,:) = derImg(1279,:);
+% derImg(:,1) = derImg(:,2);
+% derImg(:,1024) = derImg(:,1023);
+% derImg = derImg + abs(min(derImg,[],'all'));
 
-phi = calcphi(logImg, abs(mean(derImg,'all'))*0.1, 0.8, 5);
+%% Phi
+
+phi = calcphi(logImg(3:1270,3:1010), abs(mean(logImg,'all'))*0.1, 0.95, 1);
 atImg = phi .* derImg;
+figure()
+subplot(1,2,1)
+im(atImg),colormap(gray),colorbar%,caxis([0 20])
+subplot(1,2,2)
+im(derImg),colormap(gray),colorbar%,caxis([0 20])
 
 % 
 % IMG(:,:,1) = IMG(:,:,1) + max(IMG(:,:,size(IMG,3)),[],'all');
@@ -118,14 +138,12 @@ while rCrit > 1e-4
     x = x2;
     r = r2;
     i = i+1;
-    im(x), colormap(gray)
+    im(x), colormap(gray), colorbar
     drawnow
     disp(rCrit)
 end
 
-%% Setting masks
+%%
 
-% load in all the iamges
-
-
-
+expImg = 10.^x;
+im(expImg), colormap(gray), colorbar
