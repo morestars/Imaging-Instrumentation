@@ -83,6 +83,18 @@ im(IMG(:,:,234)),colormap(gray),colorbar
 mask(:,:,1) = ones(1280,1024);
 IMG = IMG .* mask;
 
+%% Photons
+photonCounts = [];
+for i = 1:234
+    photonCounts = [photonCounts sum(refIMG(:,:,i),'all')];
+end
+expTimes = 0.01:0.01:0.1;
+expTimes = [expTimes 0.1:0.1:1];
+expTimes = [expTimes 1:1:130];
+expTimes = [expTimes 130:10:1000];
+expTimes = [expTimes 1500:100:1900];
+expTimes = [expTimes 1999];
+
 %% More image manipulation
 
 DRsum = sum(IMG,3);
@@ -94,18 +106,19 @@ logImg = log10(DRimg);
 %logImg = logImg + min(logImg,[],'all');
 
 der = [0 1 0; 1 -4 1; 0 1 0]; % kernel to take the derivative
-derImg = conv2(logImg,der);
-derImg = derImg(3:1280,3:1024);
-% derImg(1,:) = derImg(2,:);
-% derImg(1280,:) = derImg(1279,:);
-% derImg(:,1) = derImg(:,2);
-% derImg(:,1024) = derImg(:,1023);
+derImg = conv2(logImg,der,'same');
+derImg = derImg - mean(derImg,'all');
+%derImg = derImg(2:1279,2:1023);
+derImg(1,:) = derImg(2,:);
+derImg(1280,:) = derImg(1279,:);
+derImg(:,1) = derImg(:,2);
+derImg(:,1024) = derImg(:,1023);
 % derImg = derImg + abs(min(derImg,[],'all'));
 
 %% Phi
 
-phi = calcphi(logImg, abs(mean(logImg,'all'))*0.01, 0.9, 2);
-atImg = phi(2:1279,2:1023) .* derImg;
+phi = calcphi(derImg, abs(mean(derImg,'all'))*100, 0.8, 3);
+atImg = phi .* derImg;
 figure()
 subplot(1,2,1)
 im(atImg),colormap(gray),colorbar%,caxis([0 20])
@@ -122,7 +135,7 @@ img_der = conv2(img_log,der);
 img_der = img_der(2:1025,2:1281);
 img = imread('cameraman.tif');
 %% 
-img = atImg;
+img = derImg;
 % r0 = b - Ax0
 %b = conv2(img,der,'same');
 b = img;
