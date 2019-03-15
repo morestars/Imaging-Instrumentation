@@ -94,8 +94,8 @@ logImg = log10(DRimg);
 %logImg = logImg + min(logImg,[],'all');
 
 der = [0 1 0; 1 -4 1; 0 1 0]; % kernel to take the derivative
-derImg = conv2(logImg,der,'same');
-derImg = derImg(3:1270,3:1010);
+derImg = conv2(logImg,der);
+derImg = derImg(3:1280,3:1024);
 % derImg(1,:) = derImg(2,:);
 % derImg(1280,:) = derImg(1279,:);
 % derImg(:,1) = derImg(:,2);
@@ -104,8 +104,8 @@ derImg = derImg(3:1270,3:1010);
 
 %% Phi
 
-phi = calcphi(logImg(3:1270,3:1010), abs(mean(logImg,'all'))*0.01, 0.9, 1);
-atImg = phi .* derImg;
+phi = calcphi(logImg, abs(mean(logImg,'all'))*0.01, 0.9, 2);
+atImg = phi(2:1279,2:1023) .* derImg;
 figure()
 subplot(1,2,1)
 im(atImg),colormap(gray),colorbar%,caxis([0 20])
