@@ -28,7 +28,7 @@ end
 %% Reformat images
 
 IMG = [];
-for i = 5:25
+for i = 4:25
     loadFile = sprintf('img%d.mat', i);
     load(loadFile)
     imgString = sprintf('img%d', i);
@@ -39,48 +39,55 @@ for i = 5:25
     IMG = cat(3,IMG,Img);
 end
 
-refIMG = IMG;
-%% Masks
-IMG = refIMG;
-lowMask = 200;
-highMask = 600;
-
-mask1 = (IMG > lowMask) .* (IMG <= highMask);
-%maskedIMG = IMG .* mask1;
-
 load('img26.mat') % highest exposure, darkest regions
 Img = mean(img26,3);
-IMG = cat(3,IMG,Img);
-mask3 = (Img <= 800);
+IMG = cat(3,IMG,Img); % add the highest exposure to the stack
 
-load('img4.mat'); % lowest exposure, brightest regions
-Img = mean(img4,3);
-Img = Img(:,:,1,1);
+refIMG = IMG;
+clearvars -except refIMG IMG Img
+%% Masks
+% IMG is a 1280x1024x234 double, the third dimension represents the
+% number of exposures captured
+IMG = refIMG;
+lowMask = 50;
+highMask = 900;
 
-mask2 = (Img > 50);
-%satImg = Img.*mask2;
-IMG = cat(3,Img,IMG);
-
-mask = cat(3,mask2,mask1);
-mask = cat(3,mask,mask3);
-
-%IMG = IMG - 350;
+% creates a logical matrix for every exposure setting
+mask = (IMG > lowMask) .* (IMG <= highMask); 
+% mask1 = (IMG > lowMask) .* (IMG <= highMask);
+% 
+% % load('img4.mat'); % lowest exposure, brightest regions
+% % Img = mean(img4,3);
+% % Img = Img(:,:,1,1);
+% 
+% mask2 = (Img > 50);
+% IMG = cat(3,Img,IMG); %add the lowest exposure to the stack
+% 
+% load('img26.mat') % highest exposure, darkest regions
+% Img = mean(img26,3);
+% IMG = cat(3,IMG,Img); % add the highest exposure to the stack
+% mask3 = (Img <= 900);
+% 
+% mask = cat(3,mask2,mask1);
+% mask = cat(3,mask,mask3);
 
 j = 0;
-for i = size(IMG,3):-1:1
+for i = size(IMG,3):-1:1 %back of stack==highest exposure, darkest regions
     IMG(:,:,i) = IMG(:,:,i)+((highMask-lowMask)*j);
     j = j+1;
 end
 
+figure()
+im(IMG(:,:,234)),colormap(gray),colorbar
+
 mask(:,:,1) = ones(1280,1024);
 IMG = IMG .* mask;
-%IMG = IMG+1;
 
 %% More image manipulation
 
-DRimg = sum(IMG,3);
+DRsum = sum(IMG,3);
 DRmask = sum(mask,3);
-DRimg = DRimg./DRmask;
+DRimg = DRsum./DRmask;
 
 logImg = log10(DRimg);
 %logImg = logImg - mean(logImg,'all'); % attenuate edge edges
@@ -147,4 +154,3 @@ end
 
 expImg = 10.^x;
 im(expImg), colormap(gray), colorbar
-
