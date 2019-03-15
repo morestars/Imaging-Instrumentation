@@ -45,6 +45,8 @@ IMG = cat(3,IMG,Img); % add the highest exposure to the stack
 
 refIMG = IMG;
 clearvars -except refIMG IMG Img
+
+
 %% Masks
 % IMG is a 1280x1024x234 double, the third dimension represents the
 % number of exposures captured
@@ -54,34 +56,9 @@ highMask = 900;
 
 % creates a logical matrix for every exposure setting
 mask = (IMG > lowMask) .* (IMG <= highMask); 
-% mask1 = (IMG > lowMask) .* (IMG <= highMask);
-% 
-% % load('img4.mat'); % lowest exposure, brightest regions
-% % Img = mean(img4,3);
-% % Img = Img(:,:,1,1);
-% 
-% mask2 = (Img > 50);
-% IMG = cat(3,Img,IMG); %add the lowest exposure to the stack
-% 
-% load('img26.mat') % highest exposure, darkest regions
-% Img = mean(img26,3);
-% IMG = cat(3,IMG,Img); % add the highest exposure to the stack
-% mask3 = (Img <= 900);
-% 
-% mask = cat(3,mask2,mask1);
-% mask = cat(3,mask,mask3);
-
-j = 0;
-for i = size(IMG,3):-1:1 %back of stack==highest exposure, darkest regions
-    IMG(:,:,i) = IMG(:,:,i)+((highMask-lowMask)*j);
-    j = j+1;
-end
-
-figure()
-im(IMG(:,:,234)),colormap(gray),colorbar
 
 mask(:,:,1) = ones(1280,1024);
-IMG = IMG .* mask;
+maskedImg = IMG .* mask;
 
 %% Photons
 photonCounts = [];
@@ -90,14 +67,22 @@ for i = 1:234
 end
 expTimes = 0.01:0.01:0.1;
 expTimes = [expTimes 0.1:0.1:1];
-expTimes = [expTimes 1:1:130];
+expTimes = [expTimes 1:1:10];
+expTimes = [expTimes 21:1:130];
 expTimes = [expTimes 130:10:1000];
 expTimes = [expTimes 1500:100:1900];
 expTimes = [expTimes 1999];
 
+photonsPerExposure = photonCounts./expTimes;
+
+phtnNormImg = zeros(size(refIMG));
+for i = 1:234
+    phtnNormImg(:,:,i) = maskedImg(:,:,i)/expTimes(i);
+end
+
 %% More image manipulation
 
-DRsum = sum(IMG,3);
+DRsum = sum(phtnNormImg,3);
 DRmask = sum(mask,3);
 DRimg = DRsum./DRmask;
 
