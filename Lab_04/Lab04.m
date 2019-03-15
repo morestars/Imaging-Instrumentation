@@ -77,7 +77,8 @@ photonsPerExposure = photonCounts./expTimes;
 
 phtnNormImg = zeros(size(refIMG));
 for i = 1:234
-    phtnNormImg(:,:,i) = maskedImg(:,:,i)/expTimes(i);
+    %phtnNormImg(:,:,i) = maskedImg(:,:,i)/expTimes(i);
+    phtnNormImg(:,:,i) = maskedImg(:,:,i)*photonsPerExposure(i);
 end
 
 %% More image manipulation
