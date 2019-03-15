@@ -97,7 +97,7 @@ derImg = derImg(3:1270,3:1010);
 
 %% Phi
 
-phi = calcphi(logImg(3:1270,3:1010), abs(mean(logImg,'all'))*0.1, 0.95, 1);
+phi = calcphi(logImg(3:1270,3:1010), abs(mean(logImg,'all'))*0.01, 0.9, 1);
 atImg = phi .* derImg;
 figure()
 subplot(1,2,1)
@@ -147,3 +147,4 @@ end
 
 expImg = 10.^x;
 im(expImg), colormap(gray), colorbar
+
