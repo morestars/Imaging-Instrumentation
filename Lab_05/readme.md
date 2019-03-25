@@ -1,1 +1,1 @@
-empty readme, sorry
+Lab #5: Spectral Imaging
