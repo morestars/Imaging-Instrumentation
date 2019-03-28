@@ -21,13 +21,13 @@ img4 - 550 nm (green)
 img5 - 600 nm (orange)
 img6 - 650 nm (red)
 
-Violet 	380â€“450 nm 	680â€“790 THz 	2.95â€“3.10 eV
-Blue 	450â€“485 nm 	620â€“680 THz 	2.64â€“2.75 eV
-Cyan 	485â€“500 nm 	600â€“620 THz 	2.48â€“2.52 eV
-Green 	500â€“565 nm 	530â€“600 THz 	2.25â€“2.34 eV
-Yellow 	565â€“590 nm 	510â€“530 THz 	2.10â€“2.17 eV
-Orange 	590â€“625 nm 	480â€“510 THz 	2.00â€“2.10 eV
-Red 	625â€“740 nm 	405â€“480 THz 	1.65â€“2.00 eV 
+Violet 	380–450 nm 	680–790 THz 	2.95–3.10 eV
+Blue 	450–485 nm 	620–680 THz 	2.64–2.75 eV
+Cyan 	485–500 nm 	600–620 THz 	2.48–2.52 eV
+Green 	500–565 nm 	530–600 THz 	2.25–2.34 eV
+Yellow 	565–590 nm 	510–530 THz 	2.10–2.17 eV
+Orange 	590–625 nm 	480–510 THz 	2.00–2.10 eV
+Red 	625–740 nm 	405–480 THz 	1.65–2.00 eV 
 %}
 
 %% Camera setup
@@ -51,9 +51,12 @@ end
 img = mean(imgStack,3);
 maxPix = max(img,[],'all')
 
-%% Processing
+%% Raw Data Figures
+% 
+load('colors.mat');
+%load('bean.mat');
+%load('bee.mat');
 
-load('colors.mat')
 img0 = imrotate(flip(img0),270);
 img1 = imrotate(flip(img1),270);
 img2 = imrotate(flip(img2),270);
@@ -104,11 +107,12 @@ title('G: 650 nm')
 load('transfer_functions.mat')
 
 %{
-(LT L+D{e}) -1 LT D{1./(b.*l.*s+e)} FT (FFT +D{e}) -1 â‰ˆ A
+(LT L+D{e}) -1 LT D{1./(b.*l.*s+e)} FT (FFT +D{e}) -1 ? A
 %}
 
 de = 1*ones(1,351);
 De = diag(de);
+De = 0.004;
 Dbse = diag(1./(db2.*dl.*ds+de));
 
 
@@ -116,10 +120,12 @@ A = [];
 for j = 1:7
     Afor1filter = [];
     for i = 1:3
-        a = (L(:,i)'.*L(:,i)+De)^(-1) .* L(:,i)' .* Dbse ...
-            .* F(j,:)' .* (F(j,:).*F(j,:)'+De)^(-1);
+        a = (L(:,i)'*L(:,i)+De)^(-1) * L(:,i)' * Dbse ...
+            * F(j,:)' * (F(j,:) * F(j,:)'+De)^(-1);
         a = sum(a,2);
         Afor1filter = [Afor1filter a];
     end
-    A = cat(3,A,Afor1filter);
+    A = cat(1,A,Afor1filter);
 end
+
+    
